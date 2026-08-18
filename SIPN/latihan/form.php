@@ -1,4 +1,4 @@
-<?php require 'navbar.php'?>
+g <?php require 'navbar.php'?>
     
     <!--awal container--->
     <div class="container">
