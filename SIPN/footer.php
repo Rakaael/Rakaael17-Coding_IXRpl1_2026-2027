@@ -1,3 +1,13 @@
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-  </body>
-</html>
+<footer class="bg-light border-top mt-5">
+    <div class="container text-center py-4">
+
+        <p class="mb-1">
+            &copy; <?= date('Y'); ?> SIPN
+        </p>
+
+        <small class="text-muted">
+            Sistem Informasi Pengelolaan User
+        </small>
+
+    </div>
+</footer>
