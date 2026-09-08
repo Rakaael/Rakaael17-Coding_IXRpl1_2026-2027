@@ -1,32 +1,83 @@
 <?php
-require_once __DIR__ . '/Koneksi.php';
+mysqli_report(MYSQLI_REPORT_OFF); 
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: Tambah_user.php');
-    exit;
+require_once 'koneksi.php';
+?>
+<head>
+    <link rel="stylesheet" href="style1.css">
+</head>
+
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST['username'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $role     = $_POST['role'] ?? 'siswa';
+    $only_user = isset($_POST['only_user']) && $_POST['only_user'] === '1';
+
+
+    $sql_users = "INSERT INTO users (username, password, role, created_at) 
+                  VALUES ('$username', '$password', '$role', NOW())";
+    $query_users = mysqli_query($koneksi, $sql_users);
+
+    if ($query_users) {
+        if ($only_user) {
+            echo "<script>
+                    alert('Berhasil! Data user tersimpan.');
+                    window.location.href='Daftar_user.php';
+                  </script>";
+            exit;
+        }
+
+        $id_terakhir = mysqli_insert_id($koneksi);
+        $query_profil = true;
+
+
+        if ($role == 'siswa') {
+            $nis           = $_POST['nis'] ?? '';
+            $nama          = $_POST['nama'] ?? '';
+            $kelas         = $_POST['kelas'] ?? '';
+            $jenis_kelamin = $_POST['jenis_kelamin'] ?? '';
+
+            $sql_siswa = "INSERT INTO siswa (nis, nama, kelas, jenis_kelamin, user_id) 
+                          VALUES ('$nis', '$nama', '$kelas', '$jenis_kelamin', '$id_terakhir')";
+            $query_profil = mysqli_query($koneksi, $sql_siswa);
+
+        } elseif ($role == 'guru') {
+            $nip           = $_POST['nip'] ?? '';
+            $nama          = $_POST['nama'] ?? '';
+            $jenis_kelamin = $_POST['jenis_kelamin'] ?? '';
+
+            $sql_guru = "INSERT INTO guru (nip, nama, jenis_kelamin, user_id) 
+                         VALUES ('$nip', '$nama', '$jenis_kelamin', '$id_terakhir')";
+            $query_profil = mysqli_query($koneksi, $sql_guru);
+
+        } elseif ($role == 'admin') {
+
+            $query_profil = true;
+        }
+
+
+        if ($query_profil) {
+            echo "<script>
+                    alert('Berhasil! Data $role tersimpan.'); 
+                    window.location.href='daftar_user.php';
+                  </script>";
+            exit; 
+        } else {
+            $error_profil = addslashes(mysqli_error($koneksi));
+            echo "<script>
+                    alert('Gagal menyimpan profil $role: $error_profil');
+                    window.location.href='form.php';
+                  </script>";
+            exit;
+        }
+    } else {
+        $error_users = addslashes(mysqli_error($koneksi));
+        echo "<script>
+                alert('Gagal menyimpan data kedalam tabel users: $error_users'); 
+                window.location.href='form.php';
+              </script>";
+        exit;
+    }
 }
-
-$username = trim($_POST['username'] ?? '');
-$password = $_POST['password'] ?? '';
-$role = $_POST['role'] ?? '';
-
-if ($username === '' || $password === '' || $role === '') {
-    exit('Semua data wajib diisi.');
-}
-
-$passwordHash = password_hash($password, PASSWORD_DEFAULT);
-$sql = 'INSERT INTO users (username, password, role) VALUES (?, ?, ?)';
-$stmt = mysqli_prepare($koneksi, $sql);
-if (!$stmt) {
-    exit('Gagal menyiapkan penyimpanan data: ' . mysqli_error($koneksi));
-}
-
-mysqli_stmt_bind_param($stmt, 'sss', $username, $passwordHash, $role);
-
-if (!mysqli_stmt_execute($stmt)) {
-    exit('Gagal menyimpan data: ' . mysqli_stmt_error($stmt));
-}
-
-mysqli_stmt_close($stmt);
-header('Location: Daftar_user.php');
-exit;
+?>
