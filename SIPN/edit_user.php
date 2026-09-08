@@ -21,6 +21,9 @@ mysqli_stmt_close($stmt);
 if (!$user) {
     die('ERROR: Data user tidak ditemukan.');
 }
+
+$e = fn($value) => htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
+$selected = fn($value, $option) => ($value ?? '') === $option ? 'selected' : '';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -71,23 +74,23 @@ if (!$user) {
             <h2>Edit User</h2>
 
             <form action="proses_edit.php" method="POST">
-                <input type="hidden" name="id" value="<?= htmlspecialchars((string) $user['id']); ?>">
+                <input type="hidden" name="id" value="<?= $e($user['id']); ?>">
 
                 <div class="row">
                     <div class="col-md-6">
                         <label for="nis" class="form-label">NIS</label>
-                        <input type="text" class="form-control" id="nis" name="nis" value="<?= htmlspecialchars($user['nis'] ?? ''); ?>">
+                        <input type="text" class="form-control" id="nis" name="nis" value="<?= $e($user['nis']); ?>">
                     </div>
                     <div class="col-md-6">
                         <label for="nama" class="form-label">Nama</label>
-                        <input type="text" class="form-control" id="nama" name="nama" value="<?= htmlspecialchars($user['nama'] ?? ''); ?>" required>
+                        <input type="text" class="form-control" id="nama" name="nama" value="<?= $e($user['nama']); ?>" required>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6">
                         <label for="kelas" class="form-label">Kelas</label>
-                        <input type="text" class="form-control" id="kelas" name="kelas" value="<?= htmlspecialchars($user['kelas'] ?? ''); ?>">
+                        <input type="text" class="form-control" id="kelas" name="kelas" value="<?= $e($user['kelas']); ?>">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Jenis Kelamin</label>
@@ -105,16 +108,16 @@ if (!$user) {
                 </div>
 
                 <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" name="username" value="<?= htmlspecialchars($user['username']); ?>" required>
+            <input type="text" class="form-control" id="username" name="username" value="<?= $e($user['username']); ?>" required>
 
                 <label for="password" class="form-label">Password Baru</label>
                 <input type="password" class="form-control" id="password" name="password" placeholder="Kosongkan jika tidak ingin mengubah">
 
                 <label for="role" class="form-label">Role</label>
                 <select class="form-select" id="role" name="role" required>
-                    <option value="siswa" <?= ($user['role'] ?? '') === 'siswa' ? 'selected' : ''; ?>>Siswa</option>
-                    <option value="guru" <?= ($user['role'] ?? '') === 'guru' ? 'selected' : ''; ?>>Guru</option>
-                    <option value="admin" <?= ($user['role'] ?? '') === 'admin' ? 'selected' : ''; ?>>Admin</option>
+                    <option value="siswa" <?= $selected($user['role'], 'siswa'); ?>>Siswa</option>
+                    <option value="guru" <?= $selected($user['role'], 'guru'); ?>>Guru</option>
+                    <option value="admin" <?= $selected($user['role'], 'admin'); ?>>Admin</option>
                 </select>
 
                 <div class="btn-group">
