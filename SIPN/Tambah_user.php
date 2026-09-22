@@ -1,4 +1,8 @@
-<?php require_once __DIR__ . '/Navbar.php'; ?>
+<?php
+// File ini berisi form untuk menambahkan data siswa baru.
+// Kolom yang diinput adalah NIS, nama, kelas, jenis kelamin, username, password, serta role otomatis = siswa.
+require_once __DIR__ . '/Navbar.php';
+?>
 
 <div class="container my-5">
     <div class="row justify-content-center">
@@ -6,6 +10,7 @@
             <div class="card border border-2 border-secondary-subtle rounded-4 shadow-sm" style="background: #f7f7f7;">
                 <div class="card-body p-4 p-md-5">
                     <form action="proses_tambah.php" method="POST">
+                        <!-- Form ini akan dikirim ke proses_tambah.php untuk diproses insert ke database -->
                         <h1 class="fw-normal text-center mb-4" style="font-size: 3rem;">Form Tambah Siswa</h1>
 
                         <div class="mb-3">

@@ -1,3 +1,5 @@
+<!-- File Navbar.php berfungsi sebagai template navigasi utama website. -->
+<!-- Navbar ini dipanggil dari halaman lain agar menu tetap sama di semua halaman. -->
 <!doctype html>
 <html lang="en">
 

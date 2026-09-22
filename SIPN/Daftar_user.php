@@ -1,4 +1,6 @@
 <?php
+// File ini adalah halaman daftar user utama.
+// Tujuannya adalah menampilkan data user yang sudah tersimpan di database dan menyediakan tombol Edit/Hapus.
 require_once __DIR__ . '/Koneksi.php';
 require_once __DIR__ . '/Navbar.php';
 ?>
@@ -37,16 +39,23 @@ require_once __DIR__ . '/Navbar.php';
         </thead>
         <tbody>
         <?php
+        // Menghitung nomor urut row agar tampilan daftar lebih rapi.
         $no = 1;
-        $query = mysqli_query($koneksi, "SELECT u.id, u.username, u.role, s.nama
+
+        // Query untuk mengambil data user dan data profil yang terkait.
+        // LEFT JOIN dipakai agar data user tetap tampil walau profil siswa/guru belum ada.
+        $query = mysqli_query($koneksi, "SELECT u.id, u.username, u.role,
+                COALESCE(s.nama, g.nama) AS nama
             FROM users u
             LEFT JOIN siswa s ON s.user_id = u.id
+            LEFT JOIN guru g ON g.user_id = u.id
             ORDER BY u.id DESC");
 
         if (!$query) {
             die('Query gagal: ' . mysqli_error($koneksi));
         }
 
+        // Looping data satu per satu lalu ditampilkan ke dalam baris tabel.
         while ($data = mysqli_fetch_assoc($query)) {
             $id_user = $data['id'] ?? null;
             $username = $data['username'] ?? '';
@@ -60,7 +69,9 @@ require_once __DIR__ . '/Navbar.php';
                 <td><?= htmlspecialchars($nama); ?></td>
                 <td>
                     <?php if ($id_user !== null && $id_user !== '') { ?>
+                        <!-- Tombol Edit mengirim id user ke halaman edit_user.php -->
                         <a href="edit_user.php?id=<?= urlencode((string) $id_user); ?>" class="btn btn-warning btn-sm">Edit</a>
+                        <!-- Tombol Hapus mengirim id user ke file hapus_user.php untuk proses penghapusan -->
                         <a href="hapus_user.php?id=<?= urlencode((string) $id_user); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus data ini?')">Hapus</a>
                     <?php } ?>
                 </td>

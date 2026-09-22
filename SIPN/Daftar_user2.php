@@ -1,4 +1,6 @@
 <?php
+// File ini menampilkan daftar user versi kedua.
+// Versi ini menampilkan data yang lebih lengkap, seperti password, role, NIS, kelas, jenis kelamin, dan waktu pembuatan.
 require_once __DIR__ . '/Koneksi.php';
 require_once __DIR__ . '/Navbar.php';
 ?>
@@ -32,7 +34,7 @@ require_once __DIR__ . '/Navbar.php';
                 <th>Username</th>
                 <th>Password</th>
                 <th>Role</th>
-                <th>NIS</th>
+                <th>NIS / NIP</th>
                 <th>Nama</th>
                 <th>Kelas</th>
                 <th>Jenis Kelamin</th>
@@ -42,10 +44,18 @@ require_once __DIR__ . '/Navbar.php';
         </thead>
         <tbody>
         <?php
+        // Nomor urut untuk daftar.
         $no = 1;
-        $query = mysqli_query($koneksi, "SELECT u.id, u.username, u.password, u.role, u.created_at, s.nis, s.nama, s.kelas, s.jenis_kelamin
+
+        // Query menampilkan data user dan profil yang sesuai untuk siswa maupun guru.
+        $query = mysqli_query($koneksi, "SELECT u.id, u.username, u.password, u.role, u.created_at,
+                COALESCE(s.nis, g.nip) AS nomor_identitas,
+                COALESCE(s.nama, g.nama) AS nama,
+                COALESCE(s.kelas, '-') AS kelas,
+                COALESCE(s.jenis_kelamin, g.jenis_kelamin) AS jenis_kelamin
             FROM users u
-            LEFT JOIN siswa s ON s.user_id = u.id AND u.role = 'siswa'
+            LEFT JOIN siswa s ON s.user_id = u.id
+            LEFT JOIN guru g ON g.user_id = u.id
             ORDER BY u.id DESC");
 
         if (!$query) {
@@ -58,7 +68,7 @@ require_once __DIR__ . '/Navbar.php';
             $password = $data['password'] ?? '';
             $role = $data['role'] ?? '';
             $created_at = $data['created_at'] ?? '';
-            $nis = $data['nis'] ?? '-';
+            $nomor_identitas = $data['nomor_identitas'] ?? '-';
             $nama = $data['nama'] ?? '-';
             $kelas = $data['kelas'] ?? '-';
             $jenis_kelamin = $data['jenis_kelamin'] ?? '-';
@@ -74,7 +84,7 @@ require_once __DIR__ . '/Navbar.php';
                 <td><?= htmlspecialchars($username); ?></td>
                 <td><?= htmlspecialchars($password); ?></td>
                 <td><?= htmlspecialchars($role); ?></td>
-                <td><?= htmlspecialchars($nis); ?></td>
+                <td><?= htmlspecialchars($nomor_identitas); ?></td>
                 <td><?= htmlspecialchars($nama); ?></td>
                 <td><?= htmlspecialchars($kelas); ?></td>
                 <td><?= htmlspecialchars($jenis_kelamin); ?></td>

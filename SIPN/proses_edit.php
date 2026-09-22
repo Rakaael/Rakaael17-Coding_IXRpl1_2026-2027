@@ -11,13 +11,11 @@ if (!$id) {
     die('ID user tidak valid!');
 }
 
-$nis = trim($_POST['nis'] ?? '');
+$role = trim($_POST['role'] ?? 'siswa');
 $nama = trim($_POST['nama'] ?? '');
-$kelas = trim($_POST['kelas'] ?? '');
-$jenis_kelamin = strtoupper(trim($_POST['jenis_kelamin'] ?? ''));
 $username = trim($_POST['username'] ?? '');
 $password = $_POST['password'] ?? '';
-$role = trim($_POST['role'] ?? 'siswa');
+$jenis_kelamin = strtoupper(trim($_POST['jenis_kelamin'] ?? ''));
 
 if ($nama === '') {
     die('Nama tidak boleh kosong!');
@@ -33,6 +31,23 @@ if ($password !== '' && strlen($password) < 6) {
 
 if ($jenis_kelamin !== '' && !in_array($jenis_kelamin, ['L', 'P'], true)) {
     die('Jenis kelamin tidak valid!');
+}
+
+if ($role === 'siswa') {
+    $nis = trim($_POST['nis'] ?? '');
+    $kelas = trim($_POST['kelas'] ?? '');
+
+    if ($nis === '') die('NIS tidak boleh kosong!');
+    if ($kelas === '') die('Kelas tidak boleh kosong!');
+} elseif ($role === 'guru') {
+    $nip = trim($_POST['nip'] ?? '');
+    if ($nip === '') die('NIP tidak boleh kosong!');
+} elseif ($role === 'admin') {
+    $nip = '';
+    $nis = '';
+    $kelas = '';
+} else {
+    die('Role tidak valid!');
 }
 
 $check = mysqli_prepare($koneksi, 'SELECT id FROM users WHERE username = ? AND id != ?');
@@ -77,46 +92,121 @@ if (!mysqli_stmt_execute($user_stmt)) {
 }
 mysqli_stmt_close($user_stmt);
 
-$student_check = mysqli_prepare($koneksi, 'SELECT id FROM siswa WHERE user_id = ?');
-if (!$student_check) {
-    mysqli_rollback($koneksi);
-    die('Error: ' . mysqli_error($koneksi));
-}
-
-mysqli_stmt_bind_param($student_check, 'i', $id);
-mysqli_stmt_execute($student_check);
-$student_result = mysqli_stmt_get_result($student_check);
-$student = mysqli_fetch_assoc($student_result);
-mysqli_stmt_close($student_check);
-
-if ($student) {
-    $student_stmt = mysqli_prepare($koneksi, 'UPDATE siswa SET nis = ?, nama = ?, kelas = ?, jenis_kelamin = ? WHERE id = ?');
-    if (!$student_stmt) {
+if ($role === 'siswa') {
+    $delete_old = mysqli_prepare($koneksi, 'DELETE FROM guru WHERE user_id = ?');
+    if (!$delete_old) {
         mysqli_rollback($koneksi);
         die('Error: ' . mysqli_error($koneksi));
     }
-    mysqli_stmt_bind_param($student_stmt, 'ssssi', $nis, $nama, $kelas, $jenis_kelamin, $student['id']);
-    if (!mysqli_stmt_execute($student_stmt)) {
-        $error = mysqli_stmt_error($student_stmt);
-        mysqli_stmt_close($student_stmt);
+    mysqli_stmt_bind_param($delete_old, 'i', $id);
+    mysqli_stmt_execute($delete_old);
+    mysqli_stmt_close($delete_old);
+
+    $student_check = mysqli_prepare($koneksi, 'SELECT id FROM siswa WHERE user_id = ?');
+    if (!$student_check) {
         mysqli_rollback($koneksi);
-        die('Gagal mengubah data siswa: ' . $error);
+        die('Error: ' . mysqli_error($koneksi));
     }
-    mysqli_stmt_close($student_stmt);
+    mysqli_stmt_bind_param($student_check, 'i', $id);
+    mysqli_stmt_execute($student_check);
+    $student_result = mysqli_stmt_get_result($student_check);
+    $student = mysqli_fetch_assoc($student_result);
+    mysqli_stmt_close($student_check);
+
+    if ($student) {
+        $student_stmt = mysqli_prepare($koneksi, 'UPDATE siswa SET nis = ?, nama = ?, kelas = ?, jenis_kelamin = ? WHERE user_id = ?');
+        if (!$student_stmt) {
+            mysqli_rollback($koneksi);
+            die('Error: ' . mysqli_error($koneksi));
+        }
+        mysqli_stmt_bind_param($student_stmt, 'ssssi', $nis, $nama, $kelas, $jenis_kelamin, $id);
+        if (!mysqli_stmt_execute($student_stmt)) {
+            $error = mysqli_stmt_error($student_stmt);
+            mysqli_stmt_close($student_stmt);
+            mysqli_rollback($koneksi);
+            die('Gagal mengubah data siswa: ' . $error);
+        }
+        mysqli_stmt_close($student_stmt);
+    } else {
+        $student_stmt = mysqli_prepare($koneksi, 'INSERT INTO siswa (nis, nama, kelas, jenis_kelamin, user_id) VALUES (?, ?, ?, ?, ?)');
+        if (!$student_stmt) {
+            mysqli_rollback($koneksi);
+            die('Error: ' . mysqli_error($koneksi));
+        }
+        mysqli_stmt_bind_param($student_stmt, 'ssssi', $nis, $nama, $kelas, $jenis_kelamin, $id);
+        if (!mysqli_stmt_execute($student_stmt)) {
+            $error = mysqli_stmt_error($student_stmt);
+            mysqli_stmt_close($student_stmt);
+            mysqli_rollback($koneksi);
+            die('Gagal menambah data siswa: ' . $error);
+        }
+        mysqli_stmt_close($student_stmt);
+    }
+
+} elseif ($role === 'guru') {
+    $delete_old = mysqli_prepare($koneksi, 'DELETE FROM siswa WHERE user_id = ?');
+    if (!$delete_old) {
+        mysqli_rollback($koneksi);
+        die('Error: ' . mysqli_error($koneksi));
+    }
+    mysqli_stmt_bind_param($delete_old, 'i', $id);
+    mysqli_stmt_execute($delete_old);
+    mysqli_stmt_close($delete_old);
+
+    $teacher_check = mysqli_prepare($koneksi, 'SELECT id FROM guru WHERE user_id = ?');
+    if (!$teacher_check) {
+        mysqli_rollback($koneksi);
+        die('Error: ' . mysqli_error($koneksi));
+    }
+    mysqli_stmt_bind_param($teacher_check, 'i', $id);
+    mysqli_stmt_execute($teacher_check);
+    $teacher_result = mysqli_stmt_get_result($teacher_check);
+    $teacher = mysqli_fetch_assoc($teacher_result);
+    mysqli_stmt_close($teacher_check);
+
+    if ($teacher) {
+        $teacher_stmt = mysqli_prepare($koneksi, 'UPDATE guru SET nip = ?, nama = ?, jenis_kelamin = ? WHERE user_id = ?');
+        if (!$teacher_stmt) {
+            mysqli_rollback($koneksi);
+            die('Error: ' . mysqli_error($koneksi));
+        }
+        mysqli_stmt_bind_param($teacher_stmt, 'sssi', $nip, $nama, $jenis_kelamin, $id);
+        if (!mysqli_stmt_execute($teacher_stmt)) {
+            $error = mysqli_stmt_error($teacher_stmt);
+            mysqli_stmt_close($teacher_stmt);
+            mysqli_rollback($koneksi);
+            die('Gagal mengubah data guru: ' . $error);
+        }
+        mysqli_stmt_close($teacher_stmt);
+    } else {
+        $teacher_stmt = mysqli_prepare($koneksi, 'INSERT INTO guru (nip, nama, jenis_kelamin, user_id) VALUES (?, ?, ?, ?)');
+        if (!$teacher_stmt) {
+            mysqli_rollback($koneksi);
+            die('Error: ' . mysqli_error($koneksi));
+        }
+        mysqli_stmt_bind_param($teacher_stmt, 'sssi', $nip, $nama, $jenis_kelamin, $id);
+        if (!mysqli_stmt_execute($teacher_stmt)) {
+            $error = mysqli_stmt_error($teacher_stmt);
+            mysqli_stmt_close($teacher_stmt);
+            mysqli_rollback($koneksi);
+            die('Gagal menambah data guru: ' . $error);
+        }
+        mysqli_stmt_close($teacher_stmt);
+    }
 } else {
-    $student_stmt = mysqli_prepare($koneksi, 'INSERT INTO siswa (nis, nama, kelas, jenis_kelamin, user_id) VALUES (?, ?, ?, ?, ?)');
-    if (!$student_stmt) {
-        mysqli_rollback($koneksi);
-        die('Error: ' . mysqli_error($koneksi));
+    $delete_siswa = mysqli_prepare($koneksi, 'DELETE FROM siswa WHERE user_id = ?');
+    if ($delete_siswa) {
+        mysqli_stmt_bind_param($delete_siswa, 'i', $id);
+        mysqli_stmt_execute($delete_siswa);
+        mysqli_stmt_close($delete_siswa);
     }
-    mysqli_stmt_bind_param($student_stmt, 'ssssi', $nis, $nama, $kelas, $jenis_kelamin, $id);
-    if (!mysqli_stmt_execute($student_stmt)) {
-        $error = mysqli_stmt_error($student_stmt);
-        mysqli_stmt_close($student_stmt);
-        mysqli_rollback($koneksi);
-        die('Gagal menambah data siswa: ' . $error);
+
+    $delete_guru = mysqli_prepare($koneksi, 'DELETE FROM guru WHERE user_id = ?');
+    if ($delete_guru) {
+        mysqli_stmt_bind_param($delete_guru, 'i', $id);
+        mysqli_stmt_execute($delete_guru);
+        mysqli_stmt_close($delete_guru);
     }
-    mysqli_stmt_close($student_stmt);
 }
 
 mysqli_commit($koneksi);

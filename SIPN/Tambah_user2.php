@@ -1,4 +1,8 @@
-<?php require_once __DIR__ . '/Navbar.php'; ?>
+<?php
+// File ini adalah form khusus untuk membuat akun baru dengan role admin.
+// Data yang masuk hanya username, password, dan role admin, tanpa profil tambahan.
+require_once __DIR__ . '/Navbar.php';
+?>
 
 <div class="container my-5">
     <div class="row justify-content-center">

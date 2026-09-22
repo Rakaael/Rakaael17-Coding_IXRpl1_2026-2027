@@ -1,6 +1,9 @@
 <?php
+// File ini berfungsi untuk menghapus data user sekaligus data profil terkait.
+// Proses hapus dibuat dalam transaksi agar data tidak setengah-hapus.
 require_once __DIR__ . '/Koneksi.php';
 
+// Ambil id user dari URL.
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$id) {
     exit('ID user tidak valid.');
@@ -25,7 +28,12 @@ $hapus = function (string $tabel, string $kolom, string $nama) use ($koneksi, $i
     mysqli_stmt_close($stmt);
 };
 
+// Hapus profil user dari semua tabel yang terhubung ke users.
+// Ada kemungkinan data siswa atau guru masih terkait dengan user_id.
 $hapus('siswa', 'user_id', 'siswa');
+$hapus('guru', 'user_id', 'guru');
+
+// Setelah profil terhapus, baru hapus data utama di tabel users.
 $hapus('users', 'id', 'user');
 
 mysqli_commit($koneksi);

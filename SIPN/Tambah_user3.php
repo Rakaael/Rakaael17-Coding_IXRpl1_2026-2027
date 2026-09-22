@@ -1,4 +1,8 @@
-<?php require_once __DIR__ . '/Navbar.php'; ?>
+<?php
+// File ini berisi form tambah user yang fleksibel untuk siswa, guru, maupun admin.
+// Ketika role dipilih, field profil akan otomatis tampil sesuai kebutuhan.
+require_once __DIR__ . '/Navbar.php';
+?>
 
 <div class="container my-5">
     <div class="row justify-content-center">
@@ -6,7 +10,7 @@
             <div class="card border border-2 border-secondary-subtle rounded-4 shadow-sm" style="background: #f7f7f7;">
                 <div class="card-body p-4 p-md-5">
                     <form action="proses_tambah.php" method="POST">
-                        <h1 class="fw-normal text-center mb-4" style="font-size: 3rem;">Form Tambah User 3</h1>
+                        <h1 class="fw-normal text-center mb-4" style="font-size: 3rem;">Form Tambah User</h1>
 
                         <div class="mb-3">
                             <input type="text" name="username" class="form-control form-control-lg border-0 rounded-3" style="background: #e9eefb; height: 50px;" placeholder="Username Akun | Contoh: matthias231" required>
@@ -27,8 +31,12 @@
                         </div>
 
                         <div id="profile-fields" style="display: none;">
-                            <div class="mb-3">
-                                <input type="text" name="nis" id="nis" class="form-control form-control-lg border-0 rounded-3" style="background: #e9eefb; height: 50px;" placeholder="NIS / NIP | Contoh: 1234567890">
+                            <div class="mb-3" id="nis-wrapper" style="display: none;">
+                                <input type="text" name="nis" id="nis" class="form-control form-control-lg border-0 rounded-3" style="background: #e9eefb; height: 50px;" placeholder="NIS | Contoh: 1234567890">
+                            </div>
+
+                            <div class="mb-3" id="nip-wrapper" style="display: none;">
+                                <input type="text" name="nip" id="nip" class="form-control form-control-lg border-0 rounded-3" style="background: #e9eefb; height: 50px;" placeholder="NIP | Contoh: 1987654321">
                             </div>
 
                             <div class="mb-3">
@@ -37,10 +45,6 @@
 
                             <div class="mb-3" id="kelas-wrapper" style="display: none;">
                                 <input type="text" name="kelas" id="kelas" class="form-control form-control-lg border-0 rounded-3" style="background: #e9eefb; height: 50px;" placeholder="Kelas | Contoh: XI RPL 1">
-                            </div>
-
-                            <div class="mb-3" id="mapel-wrapper" style="display: none;">
-                                <input type="text" name="mapel" id="mapel" class="form-control form-control-lg border-0 rounded-3" style="background: #e9eefb; height: 50px;" placeholder="Mapel | Contoh: Bahasa Indonesia">
                             </div>
 
                             <div class="mb-4" id="jenis-kelamin-wrapper" style="display: none;">
@@ -73,10 +77,12 @@
     document.addEventListener('DOMContentLoaded', function () {
         const roleSelect = document.getElementById('role');
         const profileFields = document.getElementById('profile-fields');
+        const nisWrapper = document.getElementById('nis-wrapper');
+        const nipWrapper = document.getElementById('nip-wrapper');
         const kelasWrapper = document.getElementById('kelas-wrapper');
-        const mapelWrapper = document.getElementById('mapel-wrapper');
         const jenisKelaminWrapper = document.getElementById('jenis-kelamin-wrapper');
-        const nisInput = document.getElementById('nip');
+        const nisInput = document.getElementById('nis');
+        const nipInput = document.getElementById('nip');
         const namaInput = document.getElementById('nama');
         const kelasInput = document.getElementById('kelas');
         const genderInputs = document.querySelectorAll('input[name="jenis_kelamin"]');
@@ -86,14 +92,15 @@
             const showProfile = role !== '';
 
             profileFields.style.display = showProfile ? 'block' : 'none';
+            nisWrapper.style.display = role === 'siswa' ? 'block' : 'none';
+            nipWrapper.style.display = role === 'guru' ? 'block' : 'none';
             kelasWrapper.style.display = role === 'siswa' ? 'block' : 'none';
-            mapelWrapper.style.display = role === 'guru' ? 'block' : 'none';
             jenisKelaminWrapper.style.display = showProfile ? 'block' : 'none';
 
-            nisInput.required = showProfile;
+            if (nisInput) nisInput.required = role === 'siswa';
+            if (nipInput) nipInput.required = role === 'guru';
             namaInput.required = showProfile;
-            kelasInput.required = role === 'siswa';
-            mapelInput.required = role === 'guru';
+            if (kelasInput) kelasInput.required = role === 'siswa';
             genderInputs.forEach(function (input) {
                 input.required = showProfile;
             });
