@@ -25,7 +25,7 @@ require_once __DIR__ . '/Navbar.php';
                             <input type="text" name="kelas" class="form-control form-control-lg border-0 rounded-3" style="background: #e9eefb; height: 50px;" placeholder="Kelas | Contoh: XI RPL 1" required>
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-4">-
                             <label class="form-label fw-semibold mb-2">Jenis Kelamin</label>
                             <div class="d-flex gap-4">
                                 <div class="form-check">
