@@ -2,7 +2,6 @@
 // File ini menampilkan form edit data user berdasarkan id yang dikirim melalui URL.
 // Form ini di-load dulu dengan data lama agar user dapat memperbarui isi form.
 require_once __DIR__ . '/Koneksi.php';
-require_once __DIR__ . '/Navbar.php';
 
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$id) {
@@ -55,6 +54,7 @@ $selected = fn($value, $option) => ($value ?? '') === $option ? 'selected' : '';
     </style>
 </head>
 <body>
+    <?php require_once __DIR__ . '/navbar.php'; ?>
     <div class="container">
         <div class="wrapper">
             <h2>Edit User</h2>

@@ -1,8 +1,7 @@
 <?php
 // File ini menampilkan daftar user versi kedua.
-// Versi ini menampilkan data yang lebih lengkap, seperti password, role, NIS, kelas, jenis kelamin, dan waktu pembuatan.
+// Versi ini menampilkan data profil user dan waktu pembuatan.
 require_once __DIR__ . '/Koneksi.php';
-require_once __DIR__ . '/Navbar.php';
 ?>
 
 <!doctype html>
@@ -16,15 +15,20 @@ require_once __DIR__ . '/Navbar.php';
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <style>
         body { background-color: white; }
-        .container-fluid { padding: 30px 65px; }
+        .table-container { padding: 30px 65px; }
         .judul { text-align: center; font-size: 42px; font-weight: 600; margin-top: 20px; margin-bottom: 90px; }
         table.dataTable thead th { font-weight: 600; font-size: 18px; }
         table.dataTable tbody td { font-size: 16px; }
+        @media (max-width: 768px) {
+            .table-container { padding: 24px 16px; }
+            .judul { font-size: 32px; margin-bottom: 40px; }
+        }
     </style>
 </head>
 
 <body>
-<div class="container-fluid">
+<?php require_once __DIR__ . '/navbar.php'; ?>
+<div class="container-fluid table-container">
     <h1 class="judul">Daftar User 2</h1>
 
     <table id="tabelUser" class="table table-striped table-bordered w-100">
@@ -32,7 +36,6 @@ require_once __DIR__ . '/Navbar.php';
             <tr>
                 <th>No</th>
                 <th>Username</th>
-                <th>Password</th>
                 <th>Role</th>
                 <th>NIS / NIP</th>
                 <th>Nama</th>
@@ -48,7 +51,7 @@ require_once __DIR__ . '/Navbar.php';
         $no = 1;
 
         // Query menampilkan data user dan profil yang sesuai untuk siswa maupun guru.
-        $query = mysqli_query($koneksi, "SELECT u.id, u.username, u.password, u.role, u.created_at,
+        $query = mysqli_query($koneksi, "SELECT u.id, u.username, u.role, u.created_at,
                 COALESCE(s.nis, g.nip) AS nomor_identitas,
                 COALESCE(s.nama, g.nama) AS nama,
                 COALESCE(s.kelas, '-') AS kelas,
@@ -65,7 +68,6 @@ require_once __DIR__ . '/Navbar.php';
         while ($data = mysqli_fetch_assoc($query)) {
             $id_user = $data['id'] ?? null;
             $username = $data['username'] ?? '';
-            $password = $data['password'] ?? '';
             $role = $data['role'] ?? '';
             $created_at = $data['created_at'] ?? '';
             $nomor_identitas = $data['nomor_identitas'] ?? '-';
@@ -82,7 +84,6 @@ require_once __DIR__ . '/Navbar.php';
             <tr>
                 <td><?= $no++; ?></td>
                 <td><?= htmlspecialchars($username); ?></td>
-                <td><?= htmlspecialchars($password); ?></td>
                 <td><?= htmlspecialchars($role); ?></td>
                 <td><?= htmlspecialchars($nomor_identitas); ?></td>
                 <td><?= htmlspecialchars($nama); ?></td>
@@ -121,7 +122,7 @@ $(document).ready(function () {
                 next: 'Selanjutnya'
             }
         },
-        columnDefs: [{ orderable: false, targets: 9 }]
+        columnDefs: [{ orderable: false, targets: 8 }]
     });
 });
 </script>

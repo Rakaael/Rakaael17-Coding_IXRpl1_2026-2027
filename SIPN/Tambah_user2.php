@@ -1,8 +1,17 @@
 <?php
 // File ini adalah form khusus untuk membuat akun baru dengan role admin.
 // Data yang masuk hanya username, password, dan role admin, tanpa profil tambahan.
-require_once __DIR__ . '/Navbar.php';
 ?>
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Akun</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<?php require_once __DIR__ . '/navbar.php'; ?>
 
 <div class="container my-5">
     <div class="row justify-content-center">
@@ -25,4 +34,4 @@ require_once __DIR__ . '/Navbar.php';
     </div>
 </div>
 
-<?php require_once __DIR__ . '/Footer.php'; ?>
+<?php require_once __DIR__ . '/footer.php'; ?>

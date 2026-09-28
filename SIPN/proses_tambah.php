@@ -2,6 +2,12 @@
 mysqli_report(MYSQLI_REPORT_OFF);
 require_once __DIR__ . '/Koneksi.php';
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+$isPublicRegistration = ($_SESSION['public_student_registration'] ?? false) === true;
+unset($_SESSION['public_student_registration']);
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: Daftar_user.php');
     exit;
@@ -9,8 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $username = trim($_POST['username'] ?? '');
 $password = $_POST['password'] ?? '';
-$role = trim($_POST['role'] ?? 'siswa');
-$only_user = isset($_POST['only_user']) && $_POST['only_user'] === '1';
+$role = $isPublicRegistration ? 'siswa' : trim($_POST['role'] ?? 'siswa');
+$only_user = !$isPublicRegistration && isset($_POST['only_user']) && $_POST['only_user'] === '1';
 
 if ($username === '') {
     echo "<script>alert('Username tidak boleh kosong!'); history.back();</script>";
@@ -39,8 +45,13 @@ if (!$user_stmt) {
 mysqli_stmt_bind_param($user_stmt, 'sss', $username, $password_hash, $role);
 if (!mysqli_stmt_execute($user_stmt)) {
     $error = mysqli_stmt_error($user_stmt);
+    $errorCode = mysqli_stmt_errno($user_stmt);
     mysqli_stmt_close($user_stmt);
     mysqli_rollback($koneksi);
+    if ($isPublicRegistration && $errorCode === 1062) {
+        header('Location: Tambah_user.php?error=duplicate');
+        exit;
+    }
     die('Gagal menyimpan data user: ' . $error);
 }
 mysqli_stmt_close($user_stmt);
@@ -68,8 +79,13 @@ if ($role === 'siswa') {
     mysqli_stmt_bind_param($profil_stmt, 'ssssi', $nis, $nama, $kelas, $jenis_kelamin, $id_terakhir);
     if (!mysqli_stmt_execute($profil_stmt)) {
         $error = mysqli_stmt_error($profil_stmt);
+        $errorCode = mysqli_stmt_errno($profil_stmt);
         mysqli_stmt_close($profil_stmt);
         mysqli_rollback($koneksi);
+        if ($isPublicRegistration && $errorCode === 1062) {
+            header('Location: Tambah_user.php?error=duplicate');
+            exit;
+        }
         die('Gagal menyimpan profil siswa: ' . $error);
     }
     mysqli_stmt_close($profil_stmt);
@@ -102,6 +118,11 @@ if ($role === 'siswa') {
 }
 
 mysqli_commit($koneksi);
+
+if ($isPublicRegistration) {
+    header('Location: Login.php?registered=1');
+    exit;
+}
 
 if ($only_user) {
     echo "<script>alert('Berhasil! Data user tersimpan.'); window.location.href='Daftar_user.php';</script>";
